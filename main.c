@@ -5,6 +5,8 @@
 #include<string.h>
 #include<fcntl.h>
 #include<sys/stat.h>
+#include<time.h>
+
 
 int pid_send(pid_t id)
 {
@@ -43,26 +45,47 @@ int pid_get(pid_t pid1)
     return 0;
 }
 
-
 int main()
 {
-  int a,fd;
-  char msg[20],*tmp="/tmp/myfifo";
+    int a, fd, i = 0;
+    char msg[100], *tmp = "/tmp/myfifo";
+    pid_t pid1 = getpid(), pid2 = 0;
+
     system("clear");
-    printf("Wanna reset the file ?");
-    scanf("%d",&a);
-    if(a>0)
-    system(">pid.txt");
-    
-    pid_t pid1=getpid(),pid2=0;
-    
-    
-    fd = open(tmp,O_RDONLY);
+    printf("Wanna reset the 'pid.txt' file ?");
+    scanf("%d", &a);
+    if (a > 0)
+      system(">pid.txt");
+      
+
     pid_send(pid1);
-    while((pid2= pid_get(pid1))==0)
-    printf("\nWaiting for a new process");
-    printf("\npid2: %ld",pid2);
-    
+    while ((pid2 = pid_get(pid1)) == 0)
+    {
+      printf("\nWaiting for a new process");
+      sleep(1);
+    }
+    printf("\n1111");
+    if(a==0)
+    {
+      printf("\n2222");
+      sleep(5);
+      fd =mkfifo(tmp,O_RDONLY);
+      read(fd,msg,sizeof(msg));
+      printf("%s",msg);
+      close(fd);
+    }
+
+    if(a!=0)
+    {
+      printf("\n3333");
+      printf("\nwrite : ");
+      fd =mkfifo(tmp,O_WRONLY);
+      
+      scanf("%s",msg);
+      write(fd,msg,sizeof(msg));
+      close(fd);
+    }
+    printf("\npid2: %ld", pid2);
 
     return 0;
 }
