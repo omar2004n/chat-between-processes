@@ -65,27 +65,29 @@ int main()
       sleep(1);
     }
     printf("\n1111");
-    if(a==0)
+    while(1)
     {
-      printf("\n2222");
-      sleep(5);
-      fd =mkfifo(tmp,O_RDONLY);
-      read(fd,msg,sizeof(msg));
-      printf("%s",msg);
-      close(fd);
-    }
+        if(a==0)
+        {
+          fd = mkfifo(tmp,O_RDONLY);
+          read(fd,msg,sizeof(msg));
+          printf("\nreceive : %s",msg);
+          close(fd);
+          a=1;
+        }
 
-    if(a!=0)
-    {
-      printf("\n3333");
-      printf("\nwrite : ");
-      fd =mkfifo(tmp,O_WRONLY);
-      
-      scanf("%s",msg);
-      write(fd,msg,sizeof(msg));
-      close(fd);
+        if(a!=0)
+        {
+          fd = mkfifo(tmp,O_WRONLY);
+          
+          
+          printf("\nsend : ");
+          scanf("%s",msg);
+          write(fd,msg,sizeof(msg));
+          close(fd);
+          a=0;
+        }
     }
-    printf("\npid2: %ld", pid2);
 
     return 0;
 }
