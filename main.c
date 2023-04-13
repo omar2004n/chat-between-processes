@@ -55,37 +55,58 @@ int main()
     printf("Wanna reset the 'pid.txt' file ?");
     scanf("%d", &a);
     if (a > 0)
-      system(">pid.txt");
-      
+        system(">pid.txt");
 
     pid_send(pid1);
     while ((pid2 = pid_get(pid1)) == 0)
     {
-      printf("\nWaiting for a new process");
-      sleep(1);
+        printf("\nWaiting for a new process");
+        sleep(1);
     }
-    printf("\n1111");
-    while(1)
-    {
-        if(a==0)
-        {
-          fd = mkfifo(tmp,O_RDONLY);
-          read(fd,msg,sizeof(msg));
-          printf("\nreceive : %s",msg);
-          close(fd);
-          a=1;
-        }
+    printf("\nConnected with PID %ld", pid2);
 
-        if(a!=0)
+    if (access(tmp, F_OK) == -1)
+    {
+        fd = mkfifo(tmp, 0666);
+        if (fd == -1)
         {
-          fd = mkfifo(tmp,O_WRONLY);
-          
-          
-          printf("\nsend : ");
-          scanf("%s",msg);
-          write(fd,msg,sizeof(msg));
-          close(fd);
-          a=0;
+            printf("\nError creating FIFO file");
+            exit(1);
+        }
+    }
+
+    while (1)
+    {
+        if (a == 0)
+        {
+            fd = open(tmp, O_RDONLY);
+            if (fd == -1)
+            {
+                printf("\nError opening FIFO file");
+                exit(1);
+            }
+            if (read(fd, msg, sizeof(msg)) > 0)
+                printf("\nReceived: %s", msg);
+            close(fd);
+            a = 1;
+        }
+        else
+        {
+            fd = open(tmp, O_WRONLY);
+            if (fd == -1)
+            {
+                printf("\nError opening FIFO file");
+                exit(1);
+            }
+            printf("\nSend: ");
+            scanf("%s", msg);
+            if (write(fd, msg, sizeof(msg)) == -1)
+            {
+                printf("\nError writing to FIFO file");
+                exit(1);
+            }
+            close(fd);
+            a = 0;
         }
     }
 
